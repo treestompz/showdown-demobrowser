@@ -28,7 +28,7 @@ def demos():
     for serverPath in os.listdir(DEMOS_PATH):
         demoList = []
         for demoPath in os.listdir(DEMOS_PATH+serverPath+"/"):
-            demoList.append(gen_demo(DEMOS_PATH+serverPath+"/" + demoPath, demoPath, serverPath))
+            demoList.append(gen_demo(DEMOS_PATH+serverPath+"/" + demoPath, demoPath))
 
         newServer = {}
         newServer['server_name'] = serverPath
@@ -37,7 +37,7 @@ def demos():
 
     return fast_jsonify({'success': True, 'demos': demos})
 
-def gen_demo(filepath, filename, server):
+def gen_demo(filepath, filename):
     demo = {}
     demo['time_created'] = time.ctime(os.path.getctime(filepath))
     # TODO: ???
