@@ -1,6 +1,6 @@
 import os
 
-PORT = 8000
+PORT = 1338
 DEMOS_PATH = os.getcwd() + "/static/demos/"
 
 try:

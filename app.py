@@ -1,6 +1,6 @@
-from flask import Flask, render_template, jsonify
-import ujson
-import os, time
+from flask import Flask, request, url_for
+from flask.ext.jsonpify import jsonify
+import os
 
 
 app = Flask(__name__)
@@ -10,43 +10,40 @@ DEMOS_PATH = os.getcwd() + "/static/demos/"
 
 from config import *
 
-def fast_jsonify(*args, **kwargs):
-    if DEBUG:
-        serialized = ujson.dumps(dict(*args, **kwargs), indent=2)
-    else:
-        serialized = ujson.dumps(dict(*args, **kwargs))
+def die_with_error(error_message):
+    response = jsonify({
+        'error': True,
+        'error_message': error_message
+    })
+    response.status_code = 400
+    return response
 
-    return app.response_class((serialized, '\n'), mimetype='application/json')
+@app.route("/api/get_demo")
+def get_demo():
+    if 'server_id' not in request.args:
+        die_with_error("Need server_id")
+    if 'showdown_id' not in request.args:
+        die_with_error("Need showdown_id")
 
-@app.route('/')
-def index():
-    return render_template("index.html")
+    server_id = request.args.get('server_id')
+    showdown_id = request.args.get('showdown_id')
 
-@app.route('/api/get_demos')
-def demos():
-    demos = []
-    for serverPath in os.listdir(DEMOS_PATH):
-        demoList = []
-        for demoPath in os.listdir(DEMOS_PATH+serverPath+"/"):
-            demoList.append(gen_demo(DEMOS_PATH+serverPath+"/" + demoPath, demoPath))
+    demo_url = gen_demo_url(server_id, showdown_id)
 
-        newServer = {}
-        newServer['server_name'] = serverPath
-        newServer['server_demos'] = demoList
-        demos.append(newServer)
+    if not demo_url:
+        return jsonify(success=False)
 
-    return fast_jsonify({'success': True, 'demos': demos})
+    return jsonify(success=True, demo_url=demo_url)
 
-def gen_demo(filepath, filename):
-    demo = {}
-    demo['time_created'] = time.ctime(os.path.getctime(filepath))
-    # TODO: ???
-    demo['last_modified'] = time.ctime(os.path.getmtime(filepath))
-    sep = len(filename) - filename.index('&') - 1
-    demo['map'] = filename[-sep:]
-    demo['filename'] = filename
-    demo['filesize'] = str(os.path.getsize(filepath) / 1000) + " kb"
-    return demo
+def gen_demo_url(server_id, showdown_id):
+    for demo in os.listdir(DEMOS_PATH+server_id+"/"):
+        print demo
+        ids = demo.split(",")
+        ids.pop() # this removes the .dem from the list
+        for id in ids:
+            if id == showdown_id:
+                return url_for('static', filename="demos/"+server_id+"/"+demo)
+    return None
 
 if __name__ == '__main__':
     app.run(debug=DEBUG, port=PORT)
