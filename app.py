@@ -5,10 +5,15 @@ import os
 
 app = Flask(__name__)
 
+HOST = '0.0.0.0'
+PORT = 1338
 DEBUG = False
 DEMOS_PATH = os.getcwd() + "/static/demos/"
 
-from config import *
+try:
+    from local_config import *
+except ImportError:
+    pass
 
 def die_with_error(error_message):
     response = jsonify({
@@ -50,4 +55,4 @@ def gen_demo_url(server_id, showdown_id):
     return None
 
 if __name__ == '__main__':
-    app.run(debug=DEBUG, port=PORT)
+    app.run(debug=DEBUG, port=PORT, host=HOST)

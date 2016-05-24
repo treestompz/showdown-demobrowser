@@ -1,6 +1,6 @@
 .DS_Store
 venv/
-dev_config.py
+local_config.py
 *.pyc
 static/demos/*
 .idea/
