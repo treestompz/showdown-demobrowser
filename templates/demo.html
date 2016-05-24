@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Download Demo</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" >
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+  </head>
+
+  <body>
+    <div class="site-wrapper">
+      <div class="site-wrapper-inner">
+        <div class="cover-container">
+          <div class="inner cover">
+            <h1 class="cover-heading"></h1>
+              <div id="demo-download">
+                  <button id="finding-demo" class="btn btn-warning">Finding demo...</button>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script>
+        var showdownInfo = {
+            server_address: location.hostname+":"+location.port,
+            server_id: {{ server_id }},
+            showdown_id: {{ showdown_id }}
+        }
+        $(".cover-heading").text("Showdown #" + showdownInfo.showdown_id);
+        $.ajax({
+            url: "//" + showdownInfo.server_address + "/api/get_demo",
+            dataType: "jsonp",
+            data: showdownInfo,
+
+            success: function(response) {
+                $("#finding-demo").remove();
+                if(!response.success) {
+                    console.log("demo not found!");
+                    var failedButton = "<button class='btn btn-lg btn-danger'>Demo Not Found!</button>";
+                    $("#demo-download").append(failedButton);
+                    return;
+                }
+                var fullDemoURL = "//" + showdownInfo.server_address + response.demo_url;
+                console.log(fullDemoURL);
+                var linkedButton = "<a href='" + fullDemoURL + "'><button class='btn btn-lg btn-success'>Download Demo</button></a>";
+                $("#demo-download").append(linkedButton);
+            }
+        });
+    </script>
+  </body>
+</html>
