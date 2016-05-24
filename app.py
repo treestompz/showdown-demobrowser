@@ -1,4 +1,4 @@
-from flask import Flask, request, url_for, render_template
+from flask import Flask, request, url_for, render_template, redirect
 from flask.ext.jsonpify import jsonify
 import os
 
@@ -23,8 +23,13 @@ def die_with_error(error_message):
     response.status_code = 400
     return response
 
-@app.route("/demo/<int:server_id>/<int:showdown_id>/")
+@app.route("/demo/<server_id>/<showdown_id>/")
 def demo(server_id, showdown_id):
+    demo_url = gen_demo_url(server_id, showdown_id)
+    return redirect(demo_url)
+
+@app.route("/viewdemo/<int:server_id>/<int:showdown_id>/")
+def viewdemo(server_id, showdown_id):
     return render_template("demo.html", server_id=server_id, showdown_id=showdown_id)
 
 @app.route("/api/get_demo")
